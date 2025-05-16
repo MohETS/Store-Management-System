@@ -1,0 +1,6 @@
+services:
+  rust_app:
+    image: labo0
+    container_name: labo0_container
+    build: .
+    command: ./Labo0
