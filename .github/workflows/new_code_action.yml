@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  #This task is responsible of running Clippy which is a Rust crate
+  #This task is in charge of running Clippy which is a Rust crate
   lint_job:
     runs-on: ubuntu-latest
     name: Lint
@@ -20,7 +20,7 @@ jobs:
     - name: Run Clippy (Rust's linter)
       run: cargo clippy
 
-  #This task is responsible of running the tests
+  #This task is in charge of running the tests
   test_job:
     runs-on: ubuntu-latest
     name: Test
@@ -31,7 +31,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
-  #This task is responsible of building the Docker image and uploading to Docker Hub if the building was successful
+  #This task is in charge of building the Docker image and uploading to Docker Hub if the building was successful
   docker_image_build_job:
     runs-on: ubuntu-latest
     name: Docker image build

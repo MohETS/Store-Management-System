@@ -9,9 +9,9 @@ fn main() {
 }
 
 pub fn add_two_numbers( a:i32, b:i32 ) -> i32 {
-    return a + b;
+    a + b
 }
 
 pub fn subtract_two_numbers( a:i32, b:i32 ) -> i32 {
-    return a - b;
+    a - b
 }
