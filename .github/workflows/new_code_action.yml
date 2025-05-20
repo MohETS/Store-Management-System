@@ -3,6 +3,12 @@ name: LOG430 Lab push and pull request action
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - './img/**'
+      - './.github/**'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'README.md'
   pull_request:
     branches: [ "main" ]
 
