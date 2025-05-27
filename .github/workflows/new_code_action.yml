@@ -3,14 +3,12 @@ name: LOG430 Lab push and pull request action
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - './img/**'
-      - './.github/**'
-      - '.gitignore'
-      - '.dockerignore'
-      - 'README.md'
+    paths:
+      - 'src/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
 
 env:
   CARGO_TERM_COLOR: always

@@ -1,17 +1,15 @@
+use cursive::views::{Dialog, TextView};
+
 #[cfg(test)]
 mod main_test;
 
 fn main() {
-    println!("Hello, world!");
+    // Creates the cursive root - required for every application.
+    let mut siv = cursive::default();
 
-    println!("10 + 5 equals : {}", add_two_numbers(10,5));
-    println!("10 - 5 equals : {}", subtract_two_numbers(10,5));
-}
+    siv.add_layer(Dialog::around(TextView::new("Hello Dialog!"))
+        .title("Lab - LOG430")
+        .button("Quit", |s| s.quit()));
 
-pub fn add_two_numbers( a:i32, b:i32 ) -> i32 {
-    a + b
-}
-
-pub fn subtract_two_numbers( a:i32, b:i32 ) -> i32 {
-    a - b
+    siv.run();
 }

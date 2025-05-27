@@ -25,7 +25,7 @@ L'ordre est le suivant:
 
 La création de l'image se fait avec le fichier `Dockerfile` qui exécute plusieurs étapes de création d'images afin de créer une image très optimisée pour éviter de créer des images qui peuvent dépasser les 500 Mb voir même 1 Gb. Ensuite une utilisation des variables ***secrets*** du dépôt est utilisée afin de cacher des informations sensibles et d'éviter de les afficher durant l'exécution de la pipeline.
 
-![Successful Github action](/img/GithubAction1.png)
+![Successful Github action](/docs/img/GithubAction1.png)
 
 ## Execution Instruction
 
