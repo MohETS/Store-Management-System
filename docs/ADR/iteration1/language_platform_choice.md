@@ -25,8 +25,8 @@ Nous avons décidé de choisir Rust comme langage pour la réalisation des labor
 
 3. Écosystème
 	- Rust propose aujourd’hui plusieurs librairies qui offrent des outils très utiles pour la création d’application distribuée comme ***Tokio***
-	  pour l’aspect asynchrone d’une application, ***Diesel*** pour les interactions avec une base de données et Rocket pour créer des applications.
-	  Tous ces outils offriront une bonne base d’outils pour la création de notre application tout en gardant les avantages de Rust
+	  pour l’aspect asynchrone d’une application, ***Diesel*** pour les interactions avec une base de données et **Rocket** pour créer des
+	  applications. Tous ces outils offriront une bonne base d’outils pour la création de notre application tout en gardant les avantages de Rust
 
 ## Conséquence
 

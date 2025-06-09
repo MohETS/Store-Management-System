@@ -24,4 +24,4 @@
 
 * **Diesel**: J’ai choisi Diesel, car c’est un ORM qui intègre bien les avantages du langage Rust dans son implémentation. Diesel supporte plusieurs bases
   de données, il valide les queries durant la compilation ce qui réduit les erreurs durant le déroulement de l’application. Il utilise aussi le
-  système « d’ownership » de Rust ce qui permet d’avoir de bonne performance et une bonne gestion de la concurrence.
+  système « d’ownership » de Rust ce qui permet d’avoir de bonnes performances et une bonne gestion de la concurrence.

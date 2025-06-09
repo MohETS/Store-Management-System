@@ -1,15 +1,27 @@
-use cursive::views::{Dialog, TextView};
+use diesel::{Connection, PgConnection};
+use register::Register;
 
 #[cfg(test)]
 mod main_test;
+mod register;
+mod schema;
+mod model;
 
 fn main() {
-    // Creates the cursive root - required for every application.
+    let database_url: &str = "postgres://postgres:mohets@localhost:5432/MohSounds";
+    let conn = PgConnection::establish(database_url).unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
+
     let mut siv = cursive::default();
+    let mut register = Register::new(conn);
 
-    siv.add_layer(Dialog::around(TextView::new("Hello Dialog!"))
-        .title("Lab - LOG430")
-        .button("Quit", |s| s.quit()));
-
+    register.setup_ui(&mut siv);
     siv.run();
 }
+
+
+
+
+
+
+
+

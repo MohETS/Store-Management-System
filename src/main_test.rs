@@ -1,5 +1,3 @@
-use super::*;
-
 #[test]
 fn test_add_two_numbers() {
     assert_eq!(15, 15);
