@@ -26,3 +26,10 @@ CREATE TABLE IF NOT EXISTS public.sale_item
     CONSTRAINT fk_sale FOREIGN KEY (sale_id) REFERENCES public.sale (id) ON DELETE CASCADE,
     CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES public.product (id)
 );
+
+
+INSERT INTO public.product(id, name, category, quantity, price) VALUES (1, 'Sifu', 'Games', 10, 50);
+INSERT INTO public.product(id, name, category, quantity, price) VALUES (2, 'Sony XM4', 'Sound', 5, 250);
+INSERT INTO public.product(id, name, category, quantity, price) VALUES (3, 'Playstation 5', 'Games', 5, 500);
+INSERT INTO public.product(id, name, category, quantity, price) VALUES (4, 'Fl Studio', 'Software', 20, 250);
+INSERT INTO public.product(id, name, category, quantity, price) VALUES (5, 'NVIDIA GeForce RTX 3080 Ti ', 'Hardware', 1, 900);

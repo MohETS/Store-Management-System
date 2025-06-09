@@ -8,7 +8,7 @@ mod schema;
 mod model;
 
 fn main() {
-    let database_url: &str = "postgres://postgres:mohets@localhost:5432/MohSounds";
+    let database_url: &str = "postgres://postgres:mohets@localhost:5432/MohStore";
     let conn = PgConnection::establish(database_url).unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
 
     let mut siv = cursive::default();
