@@ -31,7 +31,10 @@ sequenceDiagram
     ConsoleUI->>Database: Query product by ID
     Database-->>ConsoleUI: Return product details
     ConsoleUI->>ConsoleUI: Calculate total price of sale
+    ConsoleUI->>ConsoleUI: Create sale items
     ConsoleUI->>Database: Record sale transaction
+    Database-->>ConsoleUI: Return confirmation
+    ConsoleUI->>Database: Record sale_item transaction
     Database-->>ConsoleUI: Return confirmation
     ConsoleUI-->>User: Display sale confirmation
 ```
@@ -46,14 +49,10 @@ sequenceDiagram
     participant Database as PostgreSQL DB
 
     User->>ConsoleUI: Select "Cancel Sale" option
-    ConsoleUI->>User: Request sale ID and product ID
-    User->>ConsoleUI: Enter sale ID and product ID
-    ConsoleUI->>Database: Query sale by ID
-    Database-->>ConsoleUI: Return sale details
-    ConsoleUI->>Database: Query product by ID
-    Database-->>ConsoleUI: Return product details
-	ConsoleUI->>ConsoleUI: Calculate quantity of product after canceled sale
-    ConsoleUI->>Database: Update quantity of canceled sale product
+    ConsoleUI->>User: Request sale ID
+    User->>ConsoleUI: Enter sale ID
+    ConsoleUI->>Database: Delete sale items
+    Database-->>ConsoleUI: Confirm sale items deletion
     ConsoleUI->>Database: Delete sale
     Database-->>ConsoleUI: Confirm sale deletion 
     ConsoleUI-->>User: Display cancellation confirmation

@@ -1,4 +1,4 @@
-use crate::model::{Product, Sale};
+use crate::model::{Product, Sale, SaleItem};
 use cursive::traits::*;
 use cursive::views::{Dialog, EditView, LinearLayout, ListView, SelectView, TextView};
 use cursive::Cursive;
@@ -28,6 +28,7 @@ impl Register {
                     .item("Cancel Sale", 3)
                     .item("View All Products", 4)
                     .item("View All Sales", 5)
+                    .item("View All Sale Items", 6)
                     .on_submit(|s, item| {
                         match *item {
                             1 => Register::show_search_menu(s),
@@ -35,6 +36,7 @@ impl Register {
                             3 => Register::show_cancel_sale(s),
                             4 => Register::show_all_products(s),
                             5 => Register::show_all_sales(s),
+                            6 => Register::show_all_sale_items(s),
                             _ => {}
                         }
                     })
@@ -209,19 +211,19 @@ impl Register {
                 LinearLayout::vertical()
                     .child(TextView::new("Sale ID:"))
                     .child(EditView::new().with_name("sale_id"))
-                    .child(TextView::new("Product ID:"))
-                    .child(EditView::new().with_name("product_id"))
+                // .child(TextView::new("Product ID:"))
+                // .child(EditView::new().with_name("product_id"))
             )
                 .title("LOG430 - Cancel Sale")
                 .button("Cancel Sale", |s| {
                     let sale_id = s.call_on_name("sale_id", |view: &mut EditView| {
                         view.get_content()
                     }).unwrap();
-                    let product_id = s.call_on_name("product_id", |view: &mut EditView| {
-                        view.get_content()
-                    }).unwrap();
+                    // let product_id = s.call_on_name("product_id", |view: &mut EditView| {
+                    //     view.get_content()
+                    // }).unwrap();
 
-                    Register::process_cancel_sale(s, sale_id.parse().unwrap_or(0), product_id.parse().unwrap_or(0));
+                    Register::process_cancel_sale(s, sale_id.parse().unwrap_or(0), 0);
                 })
                 .button("Back", |s| { s.pop_layer(); })
         );
@@ -278,8 +280,27 @@ impl Register {
 
         for sale in sales {
             list.add_child(format!("ID: {}", sale.id),
-                           TextView::new(format!("Product Amount: {}, Total Price: {}$",
-                                                 sale.product_amount, sale.total_price)));
+                           TextView::new(format!("Total Price: {}$", sale.total_price)));
+        }
+
+        siv.add_layer(
+            Dialog::around(list)
+                .title("LOG430 - All Sales")
+                .button("Back", |s| { s.pop_layer(); })
+        );
+    }
+
+    fn show_all_sale_items(siv: &mut Cursive) {
+        let mut list = ListView::new();
+
+        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
+        let mut conn = conn.lock().unwrap();
+        let sale_items = SaleItem::get_all_sale_items(&mut conn).unwrap();
+
+        for item in sale_items {
+            list.add_child(format!("ID: {}", item.id),
+                           TextView::new(format!("Sale ID: {} Product ID: {} Quantity: {} Product Price: {}$"
+                                                 , item.sale_id, item.product_id, item.quantity, item.product_price)));
         }
 
         siv.add_layer(

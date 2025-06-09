@@ -1,13 +1,13 @@
 use crate::model::Product;
 use crate::schema::{product, sale};
 use diesel::{ExpressionMethods, Insertable, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl, Selectable};
+use crate::model::sale_item::{NewSaleItem, SaleItem};
 
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = sale)]
 pub struct Sale {
     pub id: i32,
     pub total_price: i32,
-    pub product_amount: i32,
 }
 
 
@@ -15,7 +15,6 @@ pub struct Sale {
 #[diesel(table_name = sale)]
 pub struct NewSale {
     pub total_price: i32,
-    pub product_amount: i32,
 }
 
 
@@ -25,9 +24,9 @@ impl Sale {
         diesel::insert_into(sale::table).values(new_sale).get_result(conn)
     }
 
-    pub fn update_product_quantity(conn: &mut PgConnection, product_id: i32, new_quantity: i32) -> QueryResult<usize> {
-        diesel::update(product::table.find(product_id)).set(product::quantity.eq(new_quantity)).execute(conn)
-    }
+    // pub fn update_product_quantity(conn: &mut PgConnection, product_id: i32, new_quantity: i32) -> QueryResult<usize> {
+    //     diesel::update(product::table.find(product_id)).set(product::quantity.eq(new_quantity)).execute(conn)
+    // }
 
     pub fn make_sale(conn: &mut PgConnection, product_id: i32, quantity_sold: i32) -> QueryResult<(Sale, Product)> {
         let product_item = product::table
@@ -42,10 +41,18 @@ impl Sale {
 
         let new_sale = NewSale {
             total_price,
-            product_amount: quantity_sold,
         };
 
         let created_sale = Self::create_sale(conn, &new_sale)?;
+
+        let new_sale_item = NewSaleItem {
+            sale_id: created_sale.id,
+            product_id,
+            quantity: quantity_sold,
+            product_price: product_item.price
+        };
+
+        SaleItem::create_sale_item(conn, &new_sale_item).expect("Sale item creation failed");
 
         let new_quantity = product_item.quantity - quantity_sold;
         let updated_product = diesel::update(product::table.find(product_id))
@@ -57,19 +64,21 @@ impl Sale {
 
 
     /*  UC-03 - Cancel Sale */
-    pub fn cancel_sale(conn: &mut PgConnection, sale_id: i32, product_id: i32) -> QueryResult<usize> {
-        let sale_item = match Self::get_sale_by_id(conn, sale_id) {
-            Ok(sale_item) => sale_item,
-            Err(_) => return Ok(0),
-        };
+    pub fn cancel_sale(conn: &mut PgConnection, sale_id: i32, _product_id: i32) -> QueryResult<usize> {
+        // let sale_item = match Self::get_sale_by_id(conn, sale_id) {
+        //     Ok(sale_item) => sale_item,
+        //     Err(_) => return Ok(0),
+        // };
+        //
+        // let current_product = match Product::search_product_by_id(conn, product_id) {
+        //     Ok(current_product) => current_product,
+        //     Err(_) => return Ok(0),
+        // };
+        // let restored_quantity = current_product.quantity + sale_item.product_amount;
+        //
+        // Self::update_product_quantity(conn, product_id, restored_quantity)?;
 
-        let current_product = match Product::search_product_by_id(conn, product_id) {
-            Ok(current_product) => current_product,
-            Err(_) => return Ok(0),
-        };
-        let restored_quantity = current_product.quantity + sale_item.product_amount;
-
-        Self::update_product_quantity(conn, product_id, restored_quantity)?;
+        SaleItem::delete_sale_item(conn, sale_id).expect("Sale item deletion failed");
 
         Self::delete_sale(conn, sale_id)
     }
@@ -78,9 +87,9 @@ impl Sale {
         diesel::delete(sale::table.find(sale_id)).execute(conn)
     }
 
-    pub fn get_sale_by_id(conn: &mut PgConnection, sale_id: i32) -> QueryResult<Sale> {
-        sale::table.find(sale_id).first::<Sale>(conn)
-    }
+    // pub fn get_sale_by_id(conn: &mut PgConnection, sale_id: i32) -> QueryResult<Sale> {
+    //     sale::table.find(sale_id).first::<Sale>(conn)
+    // }
 
 
     pub fn get_all_sales(conn: &mut PgConnection) -> QueryResult<Vec<Sale>> {
