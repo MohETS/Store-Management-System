@@ -1,6 +1,7 @@
 mod sale_schema;
 mod product_schema;
 mod sale_item_schema;
+mod store_schema;
 
 pub use sale_schema::sale;
 pub use product_schema::product;

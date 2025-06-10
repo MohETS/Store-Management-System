@@ -1,4 +1,4 @@
-# Labo 1 - BENKHALFA Mohamed-Amine
+# Labo 0 - BENKHALFA Mohamed-Amine
 
 ## Application Description
 
@@ -34,8 +34,13 @@ La création de l'image se fait avec le fichier `Dockerfile` qui exécute plusie
    - `git clone https://github.com/MohETS/Store-Management-System`
 2. Après que le projet ait été cloné et que vous êtes à l'intérieur du dossier du projet vous pouvez exécuter la commande suivante
    - `cargo build`
-3. Pour construire l'application
-   - `cargo build --release --bin Labo1`
-4. Lancer l'application
-   - `cargo run ./Labo1`
+3. Pour construire l'application UI
+   - `cargo build --release --bin cursive_client`
+4. Pour construire le server 
+   - `cargo build --release --bin rocket_server`
+5. Lancer l'application UI
+   - `cargo run -p cursive_client`
+6. Lancer le server
+   - `cargo run -p rocket_server`
+
 **Important!!! Il faut que l'application sois executé sur la machine virutelle afin d'avoir accèes à la base de données**
