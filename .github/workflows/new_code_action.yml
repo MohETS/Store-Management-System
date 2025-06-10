@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'src/**'
+      - '../../cursive_client/src/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'src/**'
+      - '../../cursive_client/src/**'
 
 env:
   CARGO_TERM_COLOR: always

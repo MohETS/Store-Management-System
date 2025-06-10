@@ -1,7 +1,8 @@
 use crate::schema::{sale_item};
 use diesel::prelude::*;
+use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::sale_item)]
 pub struct SaleItem {
     pub id: i32,
@@ -11,7 +12,7 @@ pub struct SaleItem {
     pub product_price: i32,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::sale_item)]
 pub struct NewSaleItem {
     pub sale_id: i32,

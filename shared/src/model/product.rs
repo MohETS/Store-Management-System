@@ -1,7 +1,8 @@
 use crate::schema::product;
 use diesel::{PgConnection, PgTextExpressionMethods, QueryDsl, QueryResult, Queryable, RunQueryDsl, Selectable};
+use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = product)]
 pub struct Product {
     pub id: i32,

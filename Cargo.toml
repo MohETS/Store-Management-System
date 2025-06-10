@@ -1,8 +1,6 @@
-[package]
-name = "Labo1"
-version = "1.0.0"
-edition = "2024"
-
-[dependencies]
-cursive = "0.21"
-diesel = { version = "2.2.0", features = ["postgres"] }
+[workspace]
+members = [
+    "shared",
+    "rocket_api",
+    "cursive_client"
+]

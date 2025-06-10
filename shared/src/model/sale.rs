@@ -2,8 +2,9 @@ use crate::model::Product;
 use crate::schema::{product, sale};
 use diesel::{ExpressionMethods, Insertable, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl, Selectable};
 use crate::model::sale_item::{NewSaleItem, SaleItem};
+use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = sale)]
 pub struct Sale {
     pub id: i32,
@@ -11,7 +12,7 @@ pub struct Sale {
 }
 
 
-#[derive(Insertable)]
+#[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = sale)]
 pub struct NewSale {
     pub total_price: i32,

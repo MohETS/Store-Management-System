@@ -1,4 +1,4 @@
-use crate::model::{Product, Sale, SaleItem};
+use crate::{Product, Sale, SaleItem};
 use cursive::traits::*;
 use cursive::views::{Dialog, EditView, LinearLayout, ListView, SelectView, TextView};
 use cursive::Cursive;
