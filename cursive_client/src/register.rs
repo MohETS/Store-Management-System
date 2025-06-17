@@ -2,24 +2,25 @@ use crate::{Product, Sale, SaleItem};
 use cursive::traits::*;
 use cursive::views::{Dialog, EditView, LinearLayout, ListView, SelectView, TextView};
 use cursive::Cursive;
-use diesel::PgConnection;
-use std::sync::{Arc, Mutex};
-
+use cursive_async_view::AsyncView;
+use reqwest::blocking::Client;
+use shared::api_response::ApiResponse;
+use shared::model::MakeSaleRequest;
 
 pub struct Register {
-    conn: Arc<Mutex<PgConnection>>,
+    client: Client,
 }
 
-
 impl Register {
-    pub fn new(conn: PgConnection) -> Self {
+    pub fn new() -> Self {
         Register {
-            conn: Arc::new(Mutex::new(conn))
+            client: Client::new(),
         }
     }
 
     pub fn setup_ui(&mut self, siv: &mut Cursive) {
-        siv.set_user_data(self.conn.clone());
+        siv.set_user_data(self.client.clone());
+
         siv.add_layer(
             Dialog::around(
                 SelectView::new()
@@ -74,18 +75,7 @@ impl Register {
                         view.get_content()
                     }).unwrap();
                     if let Ok(parsed_id) = id.parse::<i32>() {
-                        let conn = s.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-                        let mut conn = conn.lock().unwrap();
-                        let product = Product::search_product_by_id(&mut conn, parsed_id);
-                        match product {
-                            Ok(product) => {
-                                let result: Vec<Product> = vec![product];
-                                Register::display_search_results(s, result);
-                            }
-                            Err(_) => {
-                                s.add_layer(Dialog::info("Product not found"));
-                            }
-                        }
+                        process_search_by_id(s, parsed_id);
                     }
                 }).button("Back", |s| { s.pop_layer(); })
         );
@@ -101,17 +91,7 @@ impl Register {
                     let name = s.call_on_name("name_input", |view: &mut EditView| {
                         view.get_content()
                     }).unwrap();
-                    let conn = s.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-                    let mut conn = conn.lock().unwrap();
-                    let products = Product::search_product_by_name(&mut conn, &name);
-                    match products {
-                        Ok(products) => {
-                            Register::display_search_results(s, products);
-                        }
-                        Err(_) => {
-                            s.add_layer(Dialog::info("Product not found"));
-                        }
-                    }
+                    process_search_by_name(s, name.to_string());
                 })
                 .button("Back", |s| { s.pop_layer(); })
         );
@@ -124,37 +104,11 @@ impl Register {
             )
                 .title("LOG430 - Enter Product Category")
                 .button("Search", |s| {
-                    let name = s.call_on_name("category_input", |view: &mut EditView| {
+                    let category = s.call_on_name("category_input", |view: &mut EditView| {
                         view.get_content()
                     }).unwrap();
-                    let conn = s.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-                    let mut conn = conn.lock().unwrap();
-                    let products = Product::search_product_by_category(&mut conn, &name);
-                    match products {
-                        Ok(products) => {
-                            Register::display_search_results(s, products);
-                        }
-                        Err(_) => {
-                            s.add_layer(Dialog::info("Product not found"));
-                        }
-                    }
+                    process_search_by_category(s, category.to_string());
                 })
-                .button("Back", |s| { s.pop_layer(); })
-        );
-    }
-
-    fn display_search_results(siv: &mut Cursive, products: Vec<Product>) {
-        let mut list = ListView::new();
-
-        for product in products {
-            list.add_child(format!("(ID:{})", product.id),
-                           TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
-                                                 product.name, product.category, product.quantity, product.price)));
-        }
-
-        siv.add_layer(
-            Dialog::around(list)
-                .title("LOG430 - Search Results")
                 .button("Back", |s| { s.pop_layer(); })
         );
     }
@@ -179,28 +133,10 @@ impl Register {
                         view.get_content()
                     }).unwrap();
 
-                    Register::process_sale(s, product_id.parse().unwrap_or(0), quantity.parse().unwrap_or(0));
+                    process_sale(s, product_id.parse().unwrap_or(0), quantity.parse().unwrap_or(0));
                 })
                 .button("Back", |s| { s.pop_layer(); })
         );
-    }
-
-    fn process_sale(siv: &mut Cursive, product_id: i32, quantity: i32) {
-        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-        let mut conn = conn.lock().unwrap();
-
-        match Sale::make_sale(&mut conn, product_id, quantity) {
-            Ok(_) => {
-                siv.add_layer(
-                    Dialog::info("Sale completed successfully!")
-                );
-            }
-            Err(_) => {
-                siv.add_layer(
-                    Dialog::info("Sale failed")
-                );
-            }
-        }
     }
 
 
@@ -223,90 +159,387 @@ impl Register {
                     //     view.get_content()
                     // }).unwrap();
 
-                    Register::process_cancel_sale(s, sale_id.parse().unwrap_or(0), 0);
+
+                    process_cancel_sale(s, sale_id.parse().unwrap_or(0), 0);
                 })
                 .button("Back", |s| { s.pop_layer(); })
         );
     }
 
-    fn process_cancel_sale(siv: &mut Cursive, sale_id: i32, product_id: i32) {
-        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-        let mut conn = conn.lock().unwrap();
-
-        match Sale::cancel_sale(&mut conn, sale_id, product_id) {
-            Ok(result) if result > 0 => {
-                siv.add_layer(
-                    Dialog::info("Sale cancelled successfully!")
-                );
-            }
-            _ => {
-                siv.add_layer(
-                    Dialog::info("No sale was cancelled")
-                );
-            }
-        }
-    }
-
 
     /* UC-04 */
     fn show_all_products(siv: &mut Cursive) {
-        let mut list = ListView::new();
+        let client: Client = {
+            let client_ref = siv.user_data::<Client>().unwrap();
+            client_ref.clone()
+        };
 
-        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-        let mut conn = conn.lock().unwrap();
-        let products = Product::get_all_products(&mut conn).unwrap();
+        let async_view = AsyncView::new_with_bg_creator(
+            siv,
+            move || {
+                let mut list = ListView::new();
+                let response = client.get("http://localhost:8000/products").send();
 
-        for product in products {
-            list.add_child(format!("ID: {}", product.id),
-                           TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
-                                                 product.name, product.category, product.quantity, product.price)));
-        }
+                match response {
+                    Ok(response) => {
+                        match response.json::<ApiResponse<Vec<Product>>>() {
+                            Ok(api_response) => {
+                                if let Some(products) = api_response.data {
+                                    for product in products {
+                                        list.add_child(format!("ID: {}", product.id),
+                                                       TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
+                                                                             product.name, product.category, product.quantity, product.price)));
+                                    }
+                                } else {
+                                    list.add_child("", TextView::new(api_response.message));
+                                }
+                            }
+                            Err(err) => {
+                                list.add_child("Parse Error: ", TextView::new(format!("Failed to parse JSON - {}", err)));
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                    }
+                }
+                Ok(list)
+            },
+            move |list: ListView| {
+                Dialog::around(list)
+                    .title("LOG430 - All Products")
+                    .button("Back", |s| {
+                        s.pop_layer();
+                    })
+            },
+        ).max_width(150);
 
-        siv.add_layer(
-            Dialog::around(list)
-                .title("LOG430 - All Products")
-                .button("Back", |s| { s.pop_layer(); })
-        );
+        siv.add_layer(async_view);
     }
 
 
     /* General function */
     fn show_all_sales(siv: &mut Cursive) {
-        let mut list = ListView::new();
+        let client: Client = {
+            let client_ref = siv.user_data::<Client>().unwrap();
+            client_ref.clone()
+        };
 
-        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-        let mut conn = conn.lock().unwrap();
-        let sales = Sale::get_all_sales(&mut conn).unwrap();
+        let async_view = AsyncView::new_with_bg_creator(
+            siv,
+            move || {
+                let mut list = ListView::new();
+                let response = client.get("http://localhost:8000/sales").send();
 
-        for sale in sales {
-            list.add_child(format!("ID: {}", sale.id),
-                           TextView::new(format!("Total Price: {}$", sale.total_price)));
-        }
+                match response {
+                    Ok(response) => {
+                        match response.json::<ApiResponse<Vec<Sale>>>() {
+                            Ok(api_response) => {
+                                if let Some(sales) = api_response.data {
+                                    for sale in sales {
+                                        list.add_child(format!("ID: {}", sale.id),
+                                                       TextView::new(format!("Total Price: {}$", sale.total_price)));
+                                    }
+                                } else {
+                                    list.add_child("", TextView::new(api_response.message));
+                                }
+                            }
+                            Err(err) => {
+                                list.add_child("", TextView::new(format!("Failed to parse JSON - {}", err)));
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                    }
+                }
 
-        siv.add_layer(
-            Dialog::around(list)
-                .title("LOG430 - All Sales")
-                .button("Back", |s| { s.pop_layer(); })
-        );
+                Ok(list)
+            },
+            move |list: ListView| {
+                Dialog::around(list)
+                    .title("LOG430 - All Sales")
+                    .button("Back", |s| {
+                        s.pop_layer();
+                    })
+            },
+        ).max_width(150);
+        siv.add_layer(async_view);
     }
 
     fn show_all_sale_items(siv: &mut Cursive) {
-        let mut list = ListView::new();
+        let client: Client = {
+            let client_ref = siv.user_data::<Client>().unwrap();
+            client_ref.clone()
+        };
 
-        let conn = siv.user_data::<Arc<Mutex<PgConnection>>>().unwrap().clone();
-        let mut conn = conn.lock().unwrap();
-        let sale_items = SaleItem::get_all_sale_items(&mut conn).unwrap();
+        let async_view = AsyncView::new_with_bg_creator(
+            siv,
+            move || {
+                let mut list = ListView::new();
+                let response = client.get("http://localhost:8000/sale-items").send();
 
-        for item in sale_items {
-            list.add_child(format!("ID: {}", item.id),
-                           TextView::new(format!("Sale ID: {} Product ID: {} Quantity: {} Product Price: {}$"
-                                                 , item.sale_id, item.product_id, item.quantity, item.product_price)));
-        }
+                match response {
+                    Ok(response) => {
+                        match response.json::<ApiResponse<Vec<SaleItem>>>() {
+                            Ok(api_response) => {
+                                if let Some(sale_items) = api_response.data {
+                                    for item in sale_items {
+                                        list.add_child(format!("ID: {}", item.id),
+                                                       TextView::new(format!("Sale ID: {} Product ID: {} Quantity: {} Product Price: {}$"
+                                                                             , item.sale_id, item.product_id, item.quantity, item.product_price)));
+                                    }
+                                } else {
+                                    list.add_child("", TextView::new(api_response.message));
+                                }
+                            }
+                            Err(err) => {
+                                list.add_child("Parse Error: ", TextView::new(format!("Failed to parse JSON - {}", err)));
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                    }
+                }
 
-        siv.add_layer(
-            Dialog::around(list)
-                .title("LOG430 - All Sales")
-                .button("Back", |s| { s.pop_layer(); })
-        );
+                Ok(list)
+            },
+            move |list: ListView| {
+                Dialog::around(list)
+                    .title("LOG430 - All Sale Items")
+                    .button("Back", |s| {
+                        s.pop_layer();
+                    })
+            },
+        ).max_width(150);
+
+        siv.add_layer(async_view);
     }
+}
+
+fn process_search_by_id(siv: &mut Cursive, product_id: i32) {
+    let client: Client = {
+        let client_ref = siv.user_data::<Client>().unwrap();
+        client_ref.clone()
+    };
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let mut list = ListView::new();
+            let response = client.get(format!("http://localhost:8000/products/id/{}", product_id)).send();
+
+            match response {
+                Ok(response) => {
+                    match response.json::<ApiResponse<Product>>() {
+                        Ok(api_response) => {
+                            if let Some(product) = api_response.data {
+                                list.add_child(format!("ID: {}", product.id),
+                                               TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
+                                                                     product.name, product.category, product.quantity, product.price)));
+                            } else {
+                                list.add_child("", TextView::new(api_response.message));
+                            }
+                        }
+                        Err(err) => {
+                            list.add_child("Parse Error: ", TextView::new(format!("Failed to parse JSON - {}", err)));
+                        }
+                    }
+                }
+                Err(err) => {
+                    list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                }
+            }
+
+            Ok(list)
+        },
+        move |list: ListView| {
+            Dialog::around(list)
+                .title("LOG430 - All Products")
+                .button("Back", |s| {
+                    s.pop_layer();
+                })
+        },
+    ).max_width(150);
+
+    siv.add_layer(async_view);
+}
+
+
+fn process_search_by_name(siv: &mut Cursive, product_name: String) {
+    let client: Client = {
+        let client_ref = siv.user_data::<Client>().unwrap();
+        client_ref.clone()
+    };
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let mut list = ListView::new();
+            let response = client.get(format!("http://localhost:8000/products/name/{}", product_name)).send();
+
+            match response {
+                Ok(response) => {
+                    match response.json::<ApiResponse<Vec<Product>>>() {
+                        Ok(api_response) => {
+                            if let Some(products) = api_response.data {
+                                for product in products {
+                                    list.add_child(format!("(ID:{})", product.id),
+                                                   TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
+                                                                         product.name, product.category, product.quantity, product.price)));
+                                }
+                            } else {
+                                list.add_child("", TextView::new(api_response.message));
+                            }
+                        }
+                        Err(err) => {
+                            list.add_child("Parse Error: ", TextView::new(format!("Failed to parse JSON - {}", err)));
+                        }
+                    }
+                }
+                Err(err) => {
+                    list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                }
+            }
+
+            Ok(list)
+        },
+        move |list: ListView| {
+            Dialog::around(list)
+                .title("LOG430 - All Products")
+                .button("Back", |s| {
+                    s.pop_layer();
+                })
+        },
+    ).max_width(150);
+
+    siv.add_layer(async_view);
+}
+
+
+fn process_search_by_category(siv: &mut Cursive, product_category: String) {
+    let client: Client = {
+        let client_ref = siv.user_data::<Client>().unwrap();
+        client_ref.clone()
+    };
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let mut list = ListView::new();
+            let response = client.get(format!("http://localhost:8000/products/name/{}", product_category)).send();
+
+            match response {
+                Ok(response) => {
+                    match response.json::<ApiResponse<Vec<Product>>>() {
+                        Ok(api_response) => {
+                            if let Some(products) = api_response.data {
+                                for product in products {
+                                    list.add_child(format!("(ID:{})", product.id),
+                                                   TextView::new(format!("Name: {}, Category: {}, Quantity: {}, Price: {}$",
+                                                                         product.name, product.category, product.quantity, product.price)));
+                                }
+                            } else {
+                                list.add_child("", TextView::new(api_response.message));
+                            }
+                        }
+                        Err(err) => {
+                            list.add_child("Parse Error: ", TextView::new(format!("Failed to parse JSON - {}", err)));
+                        }
+                    }
+                }
+                Err(err) => {
+                    list.add_child("Request Error: ", TextView::new(format!("{:?}", err)));
+                }
+            }
+
+            Ok(list)
+        },
+        move |list: ListView| {
+            Dialog::around(list)
+                .title("LOG430 - All Products")
+                .button("Back", |s| {
+                    s.pop_layer();
+                })
+        },
+    ).max_width(150);
+
+    siv.add_layer(async_view);
+}
+
+
+/* UC-02 */
+fn process_sale(siv: &mut Cursive, product_id: i32, quantity_sold: i32) {
+    let new_sale: MakeSaleRequest = MakeSaleRequest { product_id, quantity_sold };
+
+    let client: Client = {
+        let client_ref = siv.user_data::<Client>().unwrap();
+        client_ref.clone()
+    };
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let response = client.post("http://localhost:8000/make-sale").json(&new_sale).send();
+
+            let message = match response {
+                Ok(response) => {
+                    let status = response.status();
+                    if status == reqwest::StatusCode::CREATED {
+                        response.text().unwrap()
+                    } else {
+                        format!("Error {}: {}", status, response.text().unwrap())
+                    }
+                }
+                Err(err) => {
+                    format!("{:?}", err)
+                }
+            };
+
+            Ok(message)
+        },
+        move |message: String| {
+            Dialog::info(message)
+        },
+    ).max_width(150);
+
+    siv.add_layer(async_view);
+}
+
+
+/* UC-03 */
+fn process_cancel_sale(siv: &mut Cursive, sale_id: i32, _product_id: i32) {
+    let client: Client = {
+        let client_ref = siv.user_data::<Client>().unwrap();
+        client_ref.clone()
+    };
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let response = client.delete(format!("http://localhost:8000/cancel-sale/id/{}", sale_id)).send();
+
+            let message = match response {
+                Ok(response) => {
+                    let status = response.status();
+                    if status == reqwest::StatusCode::GONE {
+                        response.text().unwrap()
+                    } else {
+                        format!("Error {}: {}", status, response.text().unwrap())
+                    }
+                }
+                Err(err) => {
+                    format!("{:?}", err)
+                }
+            };
+
+            Ok(message)
+        },
+        move |message: String| {
+            Dialog::info(message)
+        },
+    ).max_width(150);
+
+    siv.add_layer(async_view);
 }

@@ -1,4 +1,5 @@
-use diesel::{Connection, PgConnection};
+use cursive::event::Event::Key;
+use cursive::event::Key::Esc;
 use register::Register;
 use shared::model::*;
 
@@ -7,14 +8,12 @@ mod main_test;
 mod register;
 
 
-fn main(){
-    let database_url: &str = "postgres://postgres:mohets@localhost:5432/MohStore";
-    let conn = PgConnection::establish(database_url).unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
-
+fn main() {
     let mut siv = cursive::default();
-    let mut register = Register::new(conn);
+    let mut register = Register::new();
 
     register.setup_ui(&mut siv);
+    siv.add_global_callback(Key(Esc), |s| s.quit());
     siv.run();
 }
 

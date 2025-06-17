@@ -1,5 +1,7 @@
 ## Rapport rédigé par Benkhalfa Mohamed-Amine
 
+Lien du projet github: https://github.com/MohETS/Store-Management-System/tree/labo2
+
 Introduction et Objectif
 ======================
 
