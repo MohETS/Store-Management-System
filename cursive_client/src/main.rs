@@ -3,8 +3,6 @@ use cursive::event::Key::Esc;
 use register::Register;
 use shared::model::*;
 
-#[cfg(test)]
-mod main_test;
 mod register;
 
 

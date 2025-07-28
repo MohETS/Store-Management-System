@@ -4,3 +4,4 @@ members = [
     "rocket_api",
     "cursive_client"
 ]
+resolver = "1"

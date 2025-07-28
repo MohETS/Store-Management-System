@@ -7,6 +7,7 @@ mod server;
 
 #[launch]
 fn rocket() -> _ {
+    dotenv::dotenv().ok();
     server::run_server()
 }
 

@@ -1,8 +1,9 @@
 use crate::schema::{sale_item};
 use diesel::prelude::*;
+use schemars::JsonSchema;
 use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable, Serialize, Deserialize)]
+#[derive(Queryable, Selectable, Serialize, Deserialize, JsonSchema)]
 #[diesel(table_name = crate::schema::sale_item)]
 pub struct SaleItem {
     pub id: i32,

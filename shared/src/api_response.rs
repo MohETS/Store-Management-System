@@ -1,23 +1,34 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+
+#[derive(Serialize, Deserialize, JsonSchema, Debug)]
 pub struct ApiResponse<T> {
+    pub status: String,
     pub message: String,
+    pub cached: bool,
     pub data: Option<T>,
+    pub path: String,
 }
 
 impl<T> ApiResponse<T> {
-    pub fn new(message: String) -> Self {
+    pub fn new(status: String, message: String, path: String) -> Self {
         ApiResponse {
+            status,
             message,
+            cached: false,
             data: None,
+            path
         }
     }
 
-    pub fn with_data(message: String, data: T) -> Self {
+    pub fn with_data(status: String, message: String, data: T, path: String) -> Self {
         ApiResponse {
+            status,
             message,
+            cached: false,
             data: Some(data),
+            path
         }
     }
 }
