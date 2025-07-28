@@ -11,7 +11,7 @@ services:
 
 
   rust_app:
-    image: moh_store/latest
+    image: moh_store
     container_name: mohstore_server
     build:
       context: ../
