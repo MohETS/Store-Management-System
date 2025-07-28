@@ -1,6 +1,8 @@
 target/
-Dockerfile
+rocket_api/Dockerfile
 .dockerignore
 .git/
 .gitignore
 .idea/
+.env
+.env.*
