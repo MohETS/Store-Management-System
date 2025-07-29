@@ -56,7 +56,7 @@ export let options = {
 };
 
 export function load_testing_get_products () {
-    const url = 'http://localhost:8000/products';
+    const url = 'http://localhost/products';
     const res = http.get(url);
 
     getProductsResponseTime.add(res.timings.duration, { endpoint: '/products' });
@@ -99,7 +99,7 @@ function getRandomPreset() {
 }
 
 export function load_testing_update_products () {
-    const url = 'http://localhost:8000/products/update';
+    const url = 'http://localhost/products/update';
     const productData = getRandomPreset();
 
     const payload = JSON.stringify(productData);

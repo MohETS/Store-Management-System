@@ -9,19 +9,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../database/scripts/:/docker-entrypoint-initdb.d
 
-
-  rust_app:
+  mohstore_server:
     image: moh_store
-    container_name: mohstore_server
     build:
       context: ../
       dockerfile: rocket_api/Dockerfile
     env_file: .env.deploy
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       - db
     command: /usr/local/bin/store_server
+
+  nginx:
+    image: nginx:alpine
+    container_name: mohstore_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - mohstore_server
 
 volumes:
   postgres_data:
