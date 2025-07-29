@@ -18,22 +18,40 @@ export default function () {
 }
 
 export let options = {
-    stages: [
-        { duration: '15s', target: 500 },
-        { duration: '15s', target: 1000 },
-        { duration: '15s', target: 1500 },
-        { duration: '15s', target: 2000 },
-        { duration: '15s', target: 3000 },
-        { duration: '15s', target: 5000 },
-    ],
-    thresholds: {
-        'get_products_response_time': [{ threshold: 'p(95)<1000', abortOnFail: true }],
-        'get_products_requests': ['rate > 10'],
-        'get_products_error_rate': [{ threshold: 'rate<0.1', abortOnFail: true }],
+    scenarios: {
+        get_products_test: {
+            executor: 'ramping-vus',
+            startTime: '0s',
+            stages: [
+                { duration: '1m', target: 5000 },
+            ],
+            exec: 'load_testing_get_products',
+        },
+        update_products_test: {
+            executor: 'ramping-vus',
+            startTime: '1m',  // Starts after first test finishes
+            stages: [
+                { duration: '1m', target: 500 },
+            ],
+            exec: 'load_testing_update_products',
+        },
+        both_tests: {
+            executor: 'ramping-vus',
+            startTime: '2m',  // Starts after first test finishes
+            stages: [
+                { duration: '1m', target: 2000 },
+            ]
+        },
 
-        'product_update_response_time': [{ threshold: 'p(95)<1000', abortOnFail: true }],
+    },
+    thresholds: {
+        'get_products_response_time': [{ threshold: 'p(95)<1000', abortOnFail: false }],
+        'get_products_requests': ['rate > 10'],
+        'get_products_error_rate': [{ threshold: 'rate<0.1', abortOnFail: false }],
+
+        'product_update_response_time': [{ threshold: 'p(95)<1000', abortOnFail: false }],
         'product_update_requests': ['rate > 10'],
-        'product_update_error_rate': [{ threshold: 'rate<0.1', abortOnFail: true }],
+        'product_update_error_rate': [{ threshold: 'rate<0.1', abortOnFail: false }],
     }
 };
 
