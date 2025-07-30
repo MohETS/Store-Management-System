@@ -1,3 +1,4 @@
+use moka::future::Cache;
 use crate::database::DbPool;
 use rocket::serde::json::Json;
 use rocket::State;
@@ -10,13 +11,19 @@ use shared::api_response::ApiResponse;
 
 #[openapi(tag = "Products")]
 #[get("/products")]
-pub fn get_all_products(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
-    let mut conn = pool.get().expect("Failed to get DB connection");
+pub async fn get_all_products(pool: &State<DbPool>, cache: &State<Cache<String, Vec<Product>>>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+    if let Some(cached_products) = cache.get("all_products").await {
+        let message = "Products Found".to_string();
+        return Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, true, cached_products, String::from("/products"))))
+    }
 
+
+    let mut conn = pool.get().expect("Failed to get DB connection");
     match Product::get_all_products(&mut conn) {
         Ok(product) => {
+            cache.insert("all_products".to_string(), product.clone()).await;
             let message = "Products Found".to_string();
-            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, product, String::from("/products"))))
+            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, false, product, String::from("/products"))))
         }
         Err(err) => {
             let message = format!("No products were found: {}", err);
@@ -27,13 +34,13 @@ pub fn get_all_products(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Pro
 
 #[openapi(tag = "Products")]
 #[get("/products/id/<id>")]
-pub fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Product>>> {
+pub async fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Product>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_id(&mut conn, id) {
         Ok(product) => {
             let message = "Product Found".to_string();
-            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, product, format!("/products/id/{id}"))))
+            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, false, product, format!("/products/id/{id}"))))
         }
         Err(err) => {
             let message = format!("No product were found: {}", err);
@@ -44,7 +51,7 @@ pub fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiRespon
 
 #[openapi(tag = "Products")]
 #[get("/products/name/<name>")]
-pub fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+pub async fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_name(&mut conn, name) {
@@ -54,7 +61,7 @@ pub fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiR
                 Custom(Status::NoContent, Json(ApiResponse::new(Status::NoContent.to_string(), message, format!("/products/name/{name}"))))
             }else{
                 let message = "Products Found".to_string();
-                Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, product, format!("/products/name/{name}"))))
+                Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, false, product, format!("/products/name/{name}"))))
             }
         }
         Err(err) => {
@@ -66,7 +73,7 @@ pub fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiR
 
 #[openapi(tag = "Products")]
 #[get("/products/category/<category>")]
-pub fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+pub async fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_category(&mut conn, category) {
@@ -76,7 +83,7 @@ pub fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<J
                 Custom(Status::NoContent, Json(ApiResponse::new(Status::NoContent.to_string(), message, format!("/products/category/{category}"))))
             }else{
                 let message = "Products Found".to_string();
-                Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, product, format!("/products/category/{category}"))))
+                Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, false, product, format!("/products/category/{category}"))))
             }
         }
         Err(err) => {
@@ -88,11 +95,12 @@ pub fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<J
 
 #[openapi(tag = "Products")]
 #[post("/products/update", data = "<product_data>")]
-pub fn update_product(pool: &State<DbPool>, product_data: Json<Product>) -> Custom<Json<ApiResponse<String>>> {
+pub async fn update_product(pool: &State<DbPool>, cache: &State<Cache<String, Vec<Product>>>, product_data: Json<Product>) -> Custom<Json<ApiResponse<String>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::update_product(&mut conn, product_data.into_inner()) {
         Ok(result) if result > 0 => {
+            cache.invalidate("all_products").await;
             let message = "Product updated".to_string();
             Custom(Status::Ok, Json(ApiResponse::new(Status::Ok.to_string(), message, String::from("/products/update"))))
         }

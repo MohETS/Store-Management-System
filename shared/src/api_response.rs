@@ -22,11 +22,11 @@ impl<T> ApiResponse<T> {
         }
     }
 
-    pub fn with_data(status: String, message: String, data: T, path: String) -> Self {
+    pub fn with_data(status: String, message: String, cached: bool, data: T, path: String) -> Self {
         ApiResponse {
             status,
             message,
-            cached: false,
+            cached,
             data: Some(data),
             path
         }

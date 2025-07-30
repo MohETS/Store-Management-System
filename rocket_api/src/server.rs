@@ -3,6 +3,7 @@ use crate::route::all_routes;
 use rocket::Rocket;
 use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
+use crate::cache_controller::build_products_cache;
 
 pub fn run_server() -> Rocket<rocket::Build> {
     let allowed_origins = AllowedOrigins::some_exact(&[
@@ -22,6 +23,9 @@ pub fn run_server() -> Rocket<rocket::Build> {
         ..Default::default()
     }.to_cors().expect("Failed to create CORS fairing");
 
-    rocket::build().attach(cors).manage(database::init_database_connection_pool()).mount("/", all_routes())
+    rocket::build().attach(cors)
+        .manage(database::init_database_connection_pool())
+        .manage(build_products_cache())
+        .mount("/", all_routes())
         .mount("/doc/", make_swagger_ui(&SwaggerUIConfig { url: "../openapi.json".to_owned(), ..Default::default() }))
 }

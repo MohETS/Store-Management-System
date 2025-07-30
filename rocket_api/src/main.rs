@@ -4,6 +4,7 @@ mod controller;
 mod route;
 mod database;
 mod server;
+mod cache_controller;
 
 #[launch]
 fn rocket() -> _ {
