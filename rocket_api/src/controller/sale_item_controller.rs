@@ -10,7 +10,7 @@ use shared::api_response::ApiResponse;
 
 #[openapi(tag = "Sale Items")]
 #[get("/sale-items")]
-pub fn get_all_sale_items(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<SaleItem>>>> {
+pub async fn get_all_sale_items(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<SaleItem>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match SaleItem::get_all_sale_items(&mut conn) {
