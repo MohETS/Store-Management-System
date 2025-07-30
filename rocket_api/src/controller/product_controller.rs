@@ -10,7 +10,7 @@ use shared::api_response::ApiResponse;
 
 #[openapi(tag = "Products")]
 #[get("/products")]
-pub fn get_all_products(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+pub async fn get_all_products(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::get_all_products(&mut conn) {
@@ -27,7 +27,7 @@ pub fn get_all_products(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Pro
 
 #[openapi(tag = "Products")]
 #[get("/products/id/<id>")]
-pub fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Product>>> {
+pub async fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Product>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_id(&mut conn, id) {
@@ -44,7 +44,7 @@ pub fn get_product_by_id(id: i32, pool: &State<DbPool>) -> Custom<Json<ApiRespon
 
 #[openapi(tag = "Products")]
 #[get("/products/name/<name>")]
-pub fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+pub async fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_name(&mut conn, name) {
@@ -66,7 +66,7 @@ pub fn get_product_by_name(name: &str, pool: &State<DbPool>) -> Custom<Json<ApiR
 
 #[openapi(tag = "Products")]
 #[get("/products/category/<category>")]
-pub fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
+pub async fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<Product>>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::search_product_by_category(&mut conn, category) {
@@ -88,7 +88,7 @@ pub fn get_product_by_category(category: &str, pool: &State<DbPool>) -> Custom<J
 
 #[openapi(tag = "Products")]
 #[post("/products/update", data = "<product_data>")]
-pub fn update_product(pool: &State<DbPool>, product_data: Json<Product>) -> Custom<Json<ApiResponse<String>>> {
+pub async fn update_product(pool: &State<DbPool>, product_data: Json<Product>) -> Custom<Json<ApiResponse<String>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match Product::update_product(&mut conn, product_data.into_inner()) {

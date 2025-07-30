@@ -10,7 +10,7 @@ use shared::api_response::ApiResponse;
 
 #[openapi(tag = "Login")]
 #[post("/login", data = "<login_credentials>")]
-pub fn store_login_authentification(pool: &State<DbPool>, login_credentials: Json<StoreAccount>) -> Custom<Json<ApiResponse<String>>> {
+pub async fn store_login_authentification(pool: &State<DbPool>, login_credentials: Json<StoreAccount>) -> Custom<Json<ApiResponse<String>>> {
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     match StoreAccount::login_authentification(&mut conn, &login_credentials.username, &login_credentials.password) {

@@ -23,7 +23,7 @@ export let options = {
             executor: 'ramping-vus',
             startTime: '0s',
             stages: [
-                { duration: '1m', target: 5000 },
+                { duration: '1m', target: 2000 },
             ],
             exec: 'load_testing_get_products',
         },
@@ -31,7 +31,7 @@ export let options = {
             executor: 'ramping-vus',
             startTime: '1m',  // Starts after first test finishes
             stages: [
-                { duration: '1m', target: 500 },
+                { duration: '1m', target: 1000 },
             ],
             exec: 'load_testing_update_products',
         },
