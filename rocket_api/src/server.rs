@@ -7,7 +7,9 @@ use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 pub fn run_server() -> Rocket<rocket::Build> {
     let allowed_origins = AllowedOrigins::some_exact(&[
         "http://127.0.0.1:8000",
-        "http://localhost:8000"
+        "http://localhost:8000",
+        "http://127.0.0.1",
+        "http://localhost"
     ]);
     let cors = CorsOptions {
         allowed_origins,
