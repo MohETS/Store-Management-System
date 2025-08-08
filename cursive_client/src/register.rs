@@ -428,7 +428,7 @@ fn process_search_by_category(siv: &mut Cursive, product_category: String) {
         siv,
         move || {
             let mut list = ListView::new();
-            let response = client.get(format!("http://localhost:8000/products/name/{}", product_category)).send();
+            let response = client.get(format!("http://localhost:8000/products/category/{}", product_category)).send();
 
             match response {
                 Ok(response) => {
