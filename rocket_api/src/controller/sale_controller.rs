@@ -16,7 +16,7 @@ pub async fn get_all_sales(pool: &State<DbPool>) -> Custom<Json<ApiResponse<Vec<
     match Sale::get_all_sales(&mut conn) {
         Ok(sales) => {
             let message = "Sales Found".to_string();
-            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, sales, String::from("/sales"))))
+            Custom(Status::Found, Json(ApiResponse::with_data(Status::Found.to_string(), message, false, sales, String::from("/sales"))))
         }
         Err(err) => {
             let message = format!("No sales were found: {}", err);

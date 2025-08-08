@@ -3,7 +3,7 @@ use diesel::{AsChangeset, PgConnection, PgTextExpressionMethods, QueryDsl, Query
 use schemars::JsonSchema;
 use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable, AsChangeset, Serialize, Deserialize, JsonSchema, Debug)]
+#[derive(Queryable, Selectable, AsChangeset, Serialize, Deserialize, JsonSchema, Debug, Clone)]
 #[diesel(table_name = product)]
 pub struct Product {
     pub id: i32,
