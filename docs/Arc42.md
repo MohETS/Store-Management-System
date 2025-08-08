@@ -2,846 +2,187 @@
 
 Lien du projet github: https://github.com/MohETS/Store-Management-System/tree/labo2
 
-Introduction et Objectif
+Introduction and Objectif
 ======================
 
-Describes the relevant requirements and the driving forces that software
-architects and development team must consider. These include
-
--   underlying business goals, essential features and functional
-	requirements for the system
-
--   quality goals for the architecture
-
--   relevant stakeholders and their expectations
+L'objectif de l'étape 2 est de convertir notre application monolithique vers une application en microservices. Cette évolution se fera à travers 3
+laboratoires qui introduiront des changements graduellement, afin de voir les impacts de chacun des changements sur les performances de notre
+application et d’observer les changements sur notre architecture.
 
 Requirements Overview
 ---------------------
 
-**Contents.**
-
-Short description of the functional requirements, driving forces,
-extract (or abstract) of requirements. Link to (hopefully existing)
-requirements documents (with version number and information where to
-find it).
-
-**Motivation.**
-
-From the point of view of the end users a system is created or modified
-to improve support of a business activity and/or improve the quality.
-
-**Form.**
-
-Short textual description, probably in tabular use-case format. If
-requirements documents exist this overview should refer to these
-documents.
-
-Keep these excerpts as short as possible. Balance readability of this
-document with potential redundancy w.r.t to requirements documents.
+Dans le cadre du laboratoire, nous devons créer une application pour un magasin qui contient plusieurs succursale. Durant ce laboratoire, nous devrons
+intégrer de la sécurité pour les endpoints de nos API, rajouter du caching et du load balancing. Finalement, il faudra diviser nos services en
+microservice et intégrer une API Gateway.
 
 Quality Goals
 -------------
 
-**Contents.**
-
-The top three (max five) quality goals for the architecture whose
-fulfillment is of highest importance to the major stakeholders. We
-really mean quality goals for the architecture. Don’t confuse them with
-project goals. They are not necessarily identical.
-
-**Motivation.**
-
-You should know the quality goals of your most important stakeholders,
-since they will influence fundamental architectural decisions. Make sure
-to be very concrete about these qualities, avoid buzzwords. If you as an
-architect do not know how the quality of your work will be judged …
-
-**Form.**
-
-A table with quality goals and concrete scenarios, ordered by priorities
+Pour cette itération des laboratoires, notre but est d’observer des améliorations au niveau des performances de nos requêtes via l’API. Avec
+l’implémentation de caching, load balancing, API gateway, nous voulons voir une amélioration dans le temps de réponses pour des requêtes et la
+quantité d’utilisateurs simultanés que nous pouvons supporter.
 
 Stakeholders
 ------------
 
-**Contents.**
-
-Explicit overview of stakeholders of the system, i.e. all person, roles
-or organizations that
-
--   should know the architecture
-
--   have to be convinced of the architecture
-
--   have to work with the architecture or with code
-
--   need the documentation of the architecture for their work
-
--   have to come up with decisions about the system or its development
-
-**Motivation.**
-
-You should know all parties involved in development of the system or
-affected by the system. Otherwise, you may get nasty surprises later in
-the development process. These stakeholders determine the extent and the
-level of detail of your work and its results.
-
-**Form.**
-
-Table with role names, person names, and their expectations with respect
-to the architecture and its documentation.
-
-| Role/Name   | Contact                   | Expectations              |
-| ----------- | ------------------------- | ------------------------- |
-| Role-1      | Contact-1                 | *&lt;Expectation-1*&gt;   |
-| Role-2      | Contact-2                 | *&lt;Expectation-2*&gt;   |
+Puisque ce laboratoire est individuel, je suis le seul stakeholder au niveau du code et de l’architecture. Cependant, l’enseignant et les chargés de
+laboratoires sont aussi des stakeholders parce qu'ils doivent être capable de comprendre le code, le naviguer et être capable de le déployer pour
+l’essayer. Il est donc important que le code soit clair et qu’il y ait suffisamment d’instruction pour qu’ils puissent déployer l’application sans
+l’aide du développeur.
 
 Architecture Constraints
 ========================
 
-**Contents.**
-
-Any requirement that constrains software architects in their freedom of
-design and implementation decisions or decision about the development
-process. These constraints sometimes go beyond individual systems and
-are valid for whole organizations and companies.
-
-**Motivation.**
-
-Architects should know exactly where they are free in their design
-decisions and where they must adhere to constraints. Constraints must
-always be dealt with; they may be negotiable, though.
-
-**Form.**
-
-Simple tables of constraints with explanations. If needed you can
-subdivide them into technical constraints, organizational and political
-constraints and conventions (e.g. programming or versioning guidelines,
-documentation or naming conventions)
+Puisque cette application est réalisée dans le cadre d’un laboratoire, il est important que la réalisation du travail reste simple. Il faut donc
+éviter d’utiliser des librairies ou des outils qui nécessiteraient trop de dépendances pour réaliser l’application. Puisque le projet est réalisé en
+Rust, il est important d’essayer d’utiliser le plus d’outils qui pourraient être directement intégrés avec un « crate » plutôt qu’une dépendance
+externe. L’objectif est de nous simplifier le déploiement de l’application et d’éviter d’avoir besoin d’installer des dépendances externes sans
+utiliser « cargo ».
 
 System Scope and Context
 ========================
 
-**Contents.**
-
-System scope and context - as the name suggests - delimits your system
-(i.e. your scope) from all its communication partners (neighboring
-systems and users, i.e. the context of your system). It thereby
-specifies the external interfaces.
-
-If necessary, differentiate the business context (domain specific inputs
-and outputs) from the technical context (channels, protocols, hardware).
-
-**Motivation.**
-
-The domain interfaces and technical interfaces to communication partners
-are among your system’s most critical aspects. Make sure that you
-completely understand them.
-
-**Form.**
-
-Various options:
-
--   Context diagrams
-
--   Lists of communication partners and their interfaces.
-
-Business Context
-----------------
-
-**Contents.**
-
-Specification of **all** communication partners (users, IT-systems, …)
-with explanations of domain specific inputs and outputs or interfaces.
-Optionally you can add domain specific formats or communication
-protocols.
-
-**Motivation.**
-
-All stakeholders should understand which data are exchanged with the
-environment of the system.
-
-**Form.**
-
-All kinds of diagrams that show the system as a black box and specify
-the domain interfaces to communication partners.
-
-Alternatively (or additionally) you can use a table. The title of the
-table is the name of your system, the three columns contain the name of
-the communication partner, the inputs, and the outputs.
-
-**&lt;Diagram or Table&gt;**
-
-**&lt;optionally: Explanation of external domain interfaces&gt;**
+Pour le laboratoire, nous devions créer un système de gestion de magasin qui évoluerait dans le temps avec différentes fonctionnalités comme faire des
+ventes, chercher des produits, générer des rapports, etc. Par manque de temps et pour réduire la complexité de l’application, nous avons omis
+plusieurs cas d’utilisation afin de garder la réalisation des laboratoires simple. Le système n’implémente donc pas des opérations selon différents
+magasins, mais plutôt des actions qui sont globales pour tous les magasins. Pour plus de détails sur les fonctionnalités de l’application, se fier au
+diagramme de cas d’utilisation.
 
 Technical Context
 -----------------
 
-**Contents.**
+**Test**
 
-Technical interfaces (channels and transmission media) linking your
-system to its environment. In addition a mapping of domain specific
-input/output to the channels, i.e. an explanation with I/O uses which
-channel.
+Pour l’intégration des tests, nous avons d’abord créé une base de données qui est uniquement utilisée pour réaliser des tests afin d’éviter d’impacter
+les données de la vraie base de données, mais de tester les communications avec la base de données. Les tests qui ont été réalisés sont des tests
+d’intégrations pour tester les différentes routes et leur fonctionnalité. Nous avons aussi rajouté une couverture de code lorsque l’on effectue nos
+tests pour assurer que la majorité du code est testé. L’outil utilisé est « cargo-tarpaulin » pour la couverture de test.
 
-**Motivation.**
+**Documentation API**
 
-Many stakeholders make architectural decision based on the technical
-interfaces between the system and its context. Especially infrastructure
-or hardware designers decide these technical interfaces.
+Pour la documentation des différentes endpoints de l’API, nous avons utilisé l’outil Swagger avec la libraire « rocket_okapi » afin de générer
+automatiquement la documentation, en utilisant les routes qui ont été créer. Cela facilite énormément la documentation des routes, car Swagger se
+charge automatiquement de créer l’information en lien avec l'endpoint et s’occupe aussi de rajouter l’option de tester les endpoints directement sur
+la documentation. On peut donc automatiquement se renseigner sur les endpoints et faire des tests sur ces endpoints au même endroit.
 
-**Form.**
+**Test de charge**
 
-E.g. UML deployment diagram describing channels to neighboring systems,
-together with a mapping table showing the relationships between channels
-and input/output.
+Pour les tests de charge, nous les avons effectués avec l’outil K6 qui est un outil faisant partie de l’écosystème de Grafana. Puisque nous avions des
+cas d’utilisation simple pour faciliter le développement de l’application, nous avons utilisé les trois scénarios suivants pour effectuer nos tests de
+charge. Le premier scénario consiste à faire la demande de la liste de tous les produits. Nous avons un nombre d’utilisateurs simultanés qui augmente
+graduellement jusqu’à ce qu’il atteigne les 2000 utilisateurs simultanés. Le deuxième scénario est similaire au précédent, seulement, cette fois-ci
+les utilisateurs mettent à jour un produit aléatoire et que le nombre d’utilisateurs visé est 1000. Finalement, le dernier scénario combine les deux
+précédents afin d’avoir un scénario ou des utilisateurs demandent la liste de produit pendant que d’autres modifient les produits. L’objectif avec le
+dernier scénario est de voir l’impact sur la cache et la disponibilité des ressources lorsque plusieurs utilisateurs simultanés modifient les mêmes
+ressources.
 
-**&lt;Diagram or Table&gt;**
+**Load Balancer**
 
-**&lt;optionally: Explanation of technical interfaces&gt;**
+Pour rajouter du « load balancing » à notre projet, nous avons décidé d’implémenter Nginx dans la plus simple des façons. Nous créer un fichier de
+configuration pour Nginx et avons modifié le docker-compose pour utiliser la fonction « --scale server=5 » afin de déployer 5 instances de notre
+serveur, lors du déploiement de notre application.
+Caching
+Puisque dans nos tests de charge, il n’y a que le scénario de recherche de produit qui peut bénéficier de l’avantage d’avoir de la cache, nous l’avons
+implémenté uniquement pour la route qui retourne la liste de tous les produits. Pour l’application nous ne faisons que du caching local au niveau des
+instances serveur, ce qui signifie que chaque instance aura sa propre cache. Plus de détails sur ces choix sont disponibles dans le ADR concernant le
+caching.
 
-**&lt;Mapping Input/Output to Channels&gt;**
+**Découpage en Service**
 
-Solution Strategy
-=================
+Cette partie du laboratoire n’a pas pu être implémentée par manque de temps et à cause de la quantité de refactoring que cela aurait demandé.
+Cependant, voilà ce qui aurait été fait si nous avions implémenté cette section. Nous aurions d’abord divisé notre API pour avoir les 3 services
+suivante. Nous aurions eu un service d’authentification qui consisterait principalement du code de notre contrôleur « authentification_controller ».
+Notre deuxième service concernerait notre système de vente qui serait une combinaison de notre code avec « sale_controller » et «
+sale_item_controller ». Finalement, le dernier service que nous aurions créé est un service pour la gestion des produits. Celui-ci serait constitué du
+code de « product_controller ». Cela nous aurait permis d’avoir nos 3 services distincts et nous aurions pu ajouter Kong comme API Gateway pour faire
+la gestion de nos différents services.
 
-**Contents.**
-
-A short summary and explanation of the fundamental decisions and
-solution strategies, that shape the system’s architecture. These include
-
--   technology decisions
-
--   decisions about the top-level decomposition of the system, e.g.
-	usage of an architectural pattern or design pattern
-
--   decisions on how to achieve key quality goals
-
--   relevant organizational decisions, e.g. selecting a development
-	process or delegating certain tasks to third parties.
-
-**Motivation.**
-
-These decisions form the cornerstones for your architecture. They are
-the basis for many other detailed decisions or implementation rules.
-
-**Form.**
-
-Keep the explanation of these key decisions short.
-
-Motivate what you have decided and why you decided that way, based upon
-your problem statement, the quality goals and key constraints. Refer to
-details in the following sections.
 
 Building Block View
 ===================
 
-**Content.**
-
-The building block view shows the static decomposition of the system
-into building blocks (modules, components, subsystems, classes,
-interfaces, packages, libraries, frameworks, layers, partitions, tiers,
-functions, macros, operations, datas structures, …) as well as their
-dependencies (relationships, associations, …)
-
-This view is mandatory for every architecture documentation. In analogy
-to a house this is the *floor plan*.
-
-**Motivation.**
-
-Maintain an overview of your source code by making its structure
-understandable through abstraction.
-
-This allows you to communicate with your stakeholder on an abstract
-level without disclosing implementation details.
-
-**Form.**
-
-The building block view is a hierarchical collection of black boxes and
-white boxes (see figure below) and their descriptions.
-
-![Hierarchy of building blocks](images/05_building_blocks-EN.png)
-
-**Level 1** is the white box description of the overall system together
-with black box descriptions of all contained building blocks.
-
-**Level 2** zooms into some building blocks of level 1. Thus it contains
-the white box description of selected building blocks of level 1,
-together with black box descriptions of their internal building blocks.
-
-**Level 3** zooms into selected building blocks of level 2, and so on.
-
-Whitebox Overall System
------------------------
-
-Here you describe the decomposition of the overall system using the
-following white box template. It contains
-
--   an overview diagram
-
--   a motivation for the decomposition
-
--   black box descriptions of the contained building blocks. For these
-	we offer you alternatives:
-
-	-   use *one* table for a short and pragmatic overview of all
-		contained building blocks and their interfaces
-
-	-   use a list of black box descriptions of the building blocks
-		according to the black box template (see below). Depending on
-		your choice of tool this list could be sub-chapters (in text
-		files), sub-pages (in a Wiki) or nested elements (in a modeling
-		tool).
-
--   (optional:) important interfaces, that are not explained in the
-	black box templates of a building block, but are very important for
-	understanding the white box. Since there are so many ways to specify
-	interfaces why do not provide a specific template for them. In the
-	worst case you have to specify and describe syntax, semantics,
-	protocols, error handling, restrictions, versions, qualities,
-	necessary compatibilities and many things more. In the best case you
-	will get away with examples or simple signatures.
-
-***&lt;Overview Diagram&gt;***
-
-Motivation
-
-:   *&lt;text explanation&gt;*
-
-Contained Building Blocks
-
-:   *&lt;Description of contained building block (black boxes)&gt;*
-
-Important Interfaces
-
-:   *&lt;Description of important interfaces&gt;*
-
-Insert your explanations of black boxes from level 1:
-
-If you use tabular form you will only describe your black boxes with
-name and responsibility according to the following schema:
-
-| **Name**             | **Responsibility**                           |
-| -------------------- | -------------------------------------------- |
-| Black Box 1          |  *&lt;Text&gt;*                              |
-| Black Box 2          |  *&lt;Text&gt;*                              |
-
-If you use a list of black box descriptions then you fill in a separate
-black box template for every important building block . Its headline is
-the name of the black box.
-
-### &lt;Name black box 1&gt;
-
-Here you describe &lt;black box 1&gt; according the the following black
-box template:
-
--   Purpose/Responsibility
-
--   Interface(s), when they are not extracted as separate paragraphs.
-	This interfaces may include qualities and performance
-	characteristics.
-
--   (Optional) Quality-/Performance characteristics of the black box,
-	e.g.availability, run time behavior, ….
-
--   (Optional) directory/file location
-
--   (Optional) Fulfilled requirements (if you need traceability to
-	requirements).
-
--   (Optional) Open issues/problems/risks
-
-*&lt;Purpose/Responsibility&gt;*
-
-*&lt;Interface(s)&gt;*
-
-*&lt;(Optional) Quality/Performance Characteristics&gt;*
-
-*&lt;(Optional) Directory/File Location&gt;*
-
-*&lt;(Optional) Fulfilled Requirements&gt;*
-
-*&lt;(optional) Open Issues/Problems/Risks&gt;*
-
-### &lt;Name black box 2&gt;
-
-*&lt;black box template&gt;*
-
-### &lt;Name black box n&gt;
-
-*&lt;black box template&gt;*
-
-### &lt;Name interface 1&gt;
-
-…
-
-### &lt;Name interface m&gt;
-
-Level 2
--------
-
-Here you can specify the inner structure of (some) building blocks from
-level 1 as white boxes.
-
-You have to decide which building blocks of your system are important
-enough to justify such a detailed description. Please prefer relevance
-over completeness. Specify important, surprising, risky, complex or
-volatile building blocks. Leave out normal, simple, boring or
-standardized parts of your system
-
-### White Box *&lt;building block 1&gt;*
-
-…describes the internal structure of *building block 1*.
-
-*&lt;white box template&gt;*
-
-### White Box *&lt;building block 2&gt;*
-
-*&lt;white box template&gt;*
-
-…
-
-### White Box *&lt;building block m&gt;*
-
-*&lt;white box template&gt;*
-
-Level 3
--------
-
-Here you can specify the inner structure of (some) building blocks from
-level 2 as white boxes.
-
-When you need more detailed levels of your architecture please copy this
-part of arc42 for additional levels.
-
-### White Box &lt;\_building block x.1\_&gt;
-
-Specifies the internal structure of *building block x.1*.
-
-*&lt;white box template&gt;*
-
-### White Box &lt;\_building block x.2\_&gt;
-
-*&lt;white box template&gt;*
-
-### White Box &lt;\_building block y.1\_&gt;
-
-*&lt;white box template&gt;*
+**Diagramme de paquetage**
+![Diagramme de paquetage](diagram/iteration4/ImplementationView.png)
+
+**Diagramme de classe**
+![Diagramme de classe](diagram/iteration4/ClassDiagram.png)
 
 Runtime View
 ============
 
-**Contents.**
+Diagram de sequence
 
-The runtime view describes concrete behavior and interactions of the
-system’s building blocks in form of scenarios from the following areas:
-
--   important use cases or features: how do building blocks execute
-	them?
-
--   interactions at critical external interfaces: how do building blocks
-	cooperate with users and neighboring systems?
-
--   operation and administration: launch, start-up, stop
-
--   error and exception scenarios
-
-Remark: The main criterion for the choice of possible scenarios
-(sequences, workflows) is their **architectural relevance**. It is
-**not** important to describe a large number of scenarios. You should
-rather document a representative selection.
-
-**Motivation.**
-
-You should understand how (instances of) building blocks of your system
-perform their job and communicate at runtime. You will mainly capture
-scenarios in your documentation to communicate your architecture to
-stakeholders that are less willing or able to read and understand the
-static models (building block view, deployment view).
-
-**Form.**
-
-There are many notations for describing scenarios, e.g.
-
--   numbered list of steps (in natural language)
-
--   activity diagrams or flow charts
-
--   sequence diagrams
-
--   BPMN or EPCs (event process chains)
-
--   state machines
-
--   …
-
-&lt;Runtime Scenario 1&gt;
---------------------------
-
--   *&lt;insert runtime diagram or textual description of the
-	scenario&gt;*
-
--   *&lt;insert description of the notable aspects of the interactions
-	between the building block instances depicted in this diagram.&gt;*
-
-&lt;Runtime Scenario 2&gt;
---------------------------
-
-… {#_}
--
-
-&lt;Runtime Scenario n&gt;
---------------------------
 
 Deployment View
 ===============
-
-**Content.**
-
-The deployment view describes:
-
-1.  the technical infrastructure used to execute your system, with
-	infrastructure elements like geographical locations, environments,
-	computers, processors, channels and net topologies as well as other
-	infrastructure elements and
-
-2.  the mapping of (software) building blocks to that infrastructure
-	elements.
-
-Often systems are executed in different environments, e.g. development
-environment, test environment, production environment. In such cases you
-should document all relevant environments.
-
-Especially document the deployment view when your software is executed
-as distributed system with more then one computer, processor, server or
-container or when you design and construct your own hardware processors
-and chips.
-
-From a software perspective it is sufficient to capture those elements
-of the infrastructure that are needed to show the deployment of your
-building blocks. Hardware architects can go beyond that and describe the
-infrastructure to any level of detail they need to capture.
-
-**Motivation.**
-
-Software does not run without hardware. This underlying infrastructure
-can and will influence your system and/or some cross-cutting concepts.
-Therefore, you need to know the infrastructure.
-
-Maybe the highest level deployment diagram is already contained in
-section 3.2. as technical context with your own infrastructure as ONE
-black box. In this section you will zoom into this black box using
-additional deployment diagrams:
-
--   UML offers deployment diagrams to express that view. Use it,
-	probably with nested diagrams, when your infrastructure is more
-	complex.
-
--   When your (hardware) stakeholders prefer other kinds of diagrams
-	rather than the deployment diagram, let them use any kind that is
-	able to show nodes and channels of the infrastructure.
-
-Infrastructure Level 1
-----------------------
-
-Describe (usually in a combination of diagrams, tables, and text):
-
--   the distribution of your system to multiple locations, environments,
-	computers, processors, .. as well as the physical connections
-	between them
-
--   important justification or motivation for this deployment structure
-
--   Quality and/or performance features of the infrastructure
-
--   the mapping of software artifacts to elements of the infrastructure
-
-For multiple environments or alternative deployments please copy that
-section of arc42 for all relevant environments.
-
-***&lt;Overview Diagram&gt;***
-
-Motivation
-
-:   *&lt;explanation in text form&gt;*
-
-Quality and/or Performance Features
-
-:   *&lt;explanation in text form&gt;*
-
-Mapping of Building Blocks to Infrastructure
-
-:   *&lt;description of the mapping&gt;*
-
-Infrastructure Level 2
-----------------------
-
-Here you can include the internal structure of (some) infrastructure
-elements from level 1.
-
-Please copy the structure from level 1 for each selected element.
-
-### *&lt;Infrastructure Element 1&gt;*
-
-*&lt;diagram + explanation&gt;*
-
-### *&lt;Infrastructure Element 2&gt;*
-
-*&lt;diagram + explanation&gt;*
-
-…
-
-### *&lt;Infrastructure Element n&gt;*
-
-*&lt;diagram + explanation&gt;*
-
-Cross-cutting Concepts
-======================
-
-**Content.**
-
-This section describes overall, principal regulations and solution ideas
-that are relevant in multiple parts (= cross-cutting) of your system.
-Such concepts are often related to multiple building blocks. They can
-include many different topics, such as
-
--   domain models
-
--   architecture patterns or design patterns
-
--   rules for using specific technology
-
--   principal, often technical decisions of overall decisions
-
--   implementation rules
-
-**Motivation.**
-
-Concepts form the basis for *conceptual integrity* (consistency,
-homogeneity) of the architecture. Thus, they are an important
-contribution to achieve inner qualities of your system.
-
-Some of these concepts cannot be assigned to individual building blocks
-(e.g. security or safety). This is the place in the template that we
-provided for a cohesive specification of such concepts.
-
-**Form.**
-
-The form can be varied:
-
--   concept papers with any kind of structure
-
--   cross-cutting model excerpts or scenarios using notations of the
-	architecture views
-
--   sample implementations, especially for technical concepts
-
--   reference to typical usage of standard frameworks (e.g. using
-	Hibernate for object/relational mapping)
-
-**Structure.**
-
-A potential (but not mandatory) structure for this section could be:
-
--   Domain concepts
-
--   User Experience concepts (UX)
-
--   Safety and security concepts
-
--   Architecture and design patterns
-
--   "Under-the-hood"
-
--   development concepts
-
--   operational concepts
-
-Note: it might be difficult to assign individual concepts to one
-specific topic on this list.
-
-![Possible topics for crosscutting concepts](images/08-Crosscutting-Concepts-Structure-EN.png)
-
-*&lt;Concept 1&gt;*
--------------------
-
-*&lt;explanation&gt;*
-
-*&lt;Concept 2&gt;*
--------------------
-
-*&lt;explanation&gt;*
-
-…
-
-*&lt;Concept n&gt;*
--------------------
-
-*&lt;explanation&gt;*
+**Diagramme de déploiement**
+![Diagramme de déploiement](diagram/iteration4/DeploymentDiagram.png)
 
 Design Decisions
 ================
 
-**Contents.**
+## Utilisation d’Influx DB pour la gestion des données des tests de charge
 
-Important, expensive, large scale or risky architecture decisions
-including rationals. With "decisions" we mean selecting one alternative
-based on given criteria.
+### Statut
 
-Please use your judgement to decide whether an architectural decision
-should be documented here in this central section or whether you better
-document it locally (e.g. within the white box template of one building
-block).
+Approved
 
-Avoid redundancy. Refer to section 4, where you already captured the
-most important decisions of your architecture.
+### Contexte
 
-**Motivation.**
+Dans le cadre de la réalisation de nos tests de charge avec l’outil K6, il nous fallait une source pour entreposer les données que nous aurons
+récoltées pour nos différents tests. L’objectif est d’utiliser cette source de données avec Grafana afin de faire des graphiques qui établiront des
+métriques pour les tests que nous avons effectués.
 
-Stakeholders of your system should be able to comprehend and retrace
-your decisions.
+### Décision
 
-**Form.**
+Au début la décision était d’utiliser Prometheus pour gérer les données, car nous voulions aussi avoir des informations sur le hardware lors de nos
+tests de charge. Cependant, puisque nous avons utilisé K6 pour la réalisation des tests de charge, nous avons fait face à des problèmes de
+configuration avec Prometheus et K6. K6 ne possède pas encore une version stable pour l'intégration de Prometheus, ce qui fait que la configuration
+n’était pas simple et lorsqu’elle a fonctionné, celle-ci n’avait pas toutes les données de nos tests. Pour éviter de perdre plus de temps sur la
+configuration de Prometheus, nous avons décidé d’utiliser InfluxDB pour gérer les données retournées par les tests.
 
-Various options:
+### Conséquence
 
--   List or table, ordered by importance and consequences or:
+L’avantage avec InfluxDB, c’est que la configuration est très simple et elle marche facilement avec Grafana, qui la reconnait directement comme une
+source. Cependant, le désavantage avec InfluxDB, c’est qu’elle ne nous offre pas beaucoup de fonctionnalité comme Prometheus. Elle agit simplement
+comme une base de données. Nous avons donc dû laisser tomber les statistiques concernant l’utilisation du hardware durant nos tests puisque nous
+n’avons pas utilisé Prometheus.
 
--   more detailed in form of separate sections per decision
+## Utilisation d’une cache locale avec Moka
 
--   ADR (architecture decision record) for every important decision
+### Statut
 
-Quality Requirements
-====================
+Approved
 
-**Content.**
+### Contexte
 
-This section contains all quality requirements as quality tree with
-scenarios. The most important ones have already been described in
-section 1.2. (quality goals)
+Pour le laboratoire, nous avons comme responsabilité d’implémenter un système de cache pour notre serveur. L’objectif est d’essayer d’améliorer les
+performances de nos requêtes avec l’utilisation de la cache.
 
-Here you can also capture quality requirements with lesser priority,
-which will not create high risks when they are not fully achieved.
+### Décision
 
-**Motivation.**
+Nous avons décidé d’utiliser un système de cache local avec la librairie Moka, pour gérer l’obtention de notre liste de produit. Nous aurions pu
+utiliser Redis pour la gestion de la cache, mais afin de garder l’implémentation de la cache simple pour le laboratoire, nous avons pris l’approche
+locale.
 
-Since quality requirements will have a lot of influence on architectural
-decisions you should know for every stakeholder what is really important
-to them, concrete and measurable.
+### Conséquence
 
-Quality Tree
-------------
+Le désavantage avec cette approche, c’est que la cache est locale alors que nous avons implémenté du load balancing. Par exemple, dans notre
+déploiement avec nos 5 instances de notre serveur, chaque instance a sa propre gestion de la cache. Ce qui fait que même si une des instances à
+l’information souhaitée en cache, si la prochaine requête est envoyée à une autre instance, il y aura un cache miss. On perd donc l’avantage d’avoir
+un système de cache comme Redis, qui rendrait la cache disponible pour toutes nos instances.
 
-**Content.**
 
-The quality tree (as defined in ATAM – Architecture Tradeoff Analysis
-Method) with quality/evaluation scenarios as leafs.
-
-**Motivation.**
-
-The tree structure with priorities provides an overview for a sometimes
-large number of quality requirements.
-
-**Form.**
-
-The quality tree is a high-level overview of the quality goals and
-requirements:
-
--   tree-like refinement of the term "quality". Use "quality" or
-	"usefulness" as a root
-
--   a mind map with quality categories as main branches
-
-In any case the tree should include links to the scenarios of the
-following section.
-
-Quality Scenarios
------------------
-
-**Contents.**
-
-Concretization of (sometimes vague or implicit) quality requirements
-using (quality) scenarios.
-
-These scenarios describe what should happen when a stimulus arrives at
-the system.
-
-For architects, two kinds of scenarios are important:
-
--   Usage scenarios (also called application scenarios or use case
-	scenarios) describe the system’s runtime reaction to a certain
-	stimulus. This also includes scenarios that describe the system’s
-	efficiency or performance. Example: The system reacts to a user’s
-	request within one second.
-
--   Change scenarios describe a modification of the system or of its
-	immediate environment. Example: Additional functionality is
-	implemented or requirements for a quality attribute change.
-
-**Motivation.**
-
-Scenarios make quality requirements concrete and allow to more easily
-measure or decide whether they are fulfilled.
-
-Especially when you want to assess your architecture using methods like
-ATAM you need to describe your quality goals (from section 1.2) more
-precisely down to a level of scenarios that can be discussed and
-evaluated.
-
-**Form.**
-
-Tabular or free form text.
 
 Risks and Technical Debts
 =========================
 
-**Contents.**
-
-A list of identified technical risks or technical debts, ordered by
-priority
-
-**Motivation.**
-
-“Risk management is project management for grown-ups” (Tim Lister,
-Atlantic Systems Guild.)
-
-This should be your motto for systematic detection and evaluation of
-risks and technical debts in the architecture, which will be needed by
-management stakeholders (e.g. project managers, product owners) as part
-of the overall risk analysis and measurement planning.
-
-**Form.**
-
-List of risks and/or technical debts, probably including suggested
-measures to minimize, mitigate or avoid risks or reduce technical debts.
-
-Glossary
-========
-
-**Contents.**
-
-The most important domain and technical terms that your stakeholders use
-when discussing the system.
-
-You can also see the glossary as source for translations if you work in
-multi-language teams.
-
-**Motivation.**
-
-You should clearly define your terms, so that all stakeholders
-
--   have an identical understanding of these terms
-
--   do not use synonyms and homonyms
-
-**Form.**
-
-A table with columns &lt;Term&gt; and &lt;Definition&gt;.
-
-Potentially more columns in case you need translations.
-
-| Term                              | Definition                        |
-| --------------------------------- | --------------------------------- |
-| Term 1                            | &lt;definition-1&gt;              |
-| Term 2                            | &lt;definition-2&gt;              |
-
-
+Dans la réalisation du projet, il y a plusieurs dettes techniques qui se sont accumulées, spécialement autour des cas d’utilisation qui n’ont pas été
+implémentés. L’absence de certains cas d’utilisation fait que l’architecture a été conçue d’une certaine façon afin de simplifier l’implémentation des
+requis du laboratoire. Par exemple, il n’y a pas d’implémentation « multi-magasin » pour les différents cas d’utilisations, donc l’ajout de ces
+fonctionnalités plus tard nécessiterait beaucoup de refactoring, car les différentes routes que nous avons implémentées devront maintenant vérifier
+qui effectué la requête et s’ils ont les droits nécessaires pour réaliser ces fonctions. Il y a aussi l’utilisation d’outils de développement comme K6
+pour la création des tests de charge qui n’a pas une implémentation stable de Prometheus, ce qui fait qu’il n’y a pas d’implémentation pour avoir des
+valeurs sur l’utilisation du « hardware » durant nos tests. L’ajout de cette fonctionnalité entrainerait donc un changement d’outils de charge de test
+pour les prendre en comptes.
