@@ -178,7 +178,7 @@ impl Register {
             siv,
             move || {
                 let mut list = ListView::new();
-                let response = client.get("http://localhost:8000/products").send();
+                let response = client.get("http://localhost/products").send();
 
                 match response {
                     Ok(response) => {
@@ -229,7 +229,7 @@ impl Register {
             siv,
             move || {
                 let mut list = ListView::new();
-                let response = client.get("http://localhost:8000/sales").send();
+                let response = client.get("http://localhost/sales").send();
 
                 match response {
                     Ok(response) => {
@@ -277,7 +277,7 @@ impl Register {
             siv,
             move || {
                 let mut list = ListView::new();
-                let response = client.get("http://localhost:8000/sale-items").send();
+                let response = client.get("http://localhost/sale-items").send();
 
                 match response {
                     Ok(response) => {
@@ -328,7 +328,7 @@ fn process_search_by_id(siv: &mut Cursive, product_id: i32) {
         siv,
         move || {
             let mut list = ListView::new();
-            let response = client.get(format!("http://localhost:8000/products/id/{}", product_id)).send();
+            let response = client.get(format!("http://localhost/products/id/{}", product_id)).send();
 
             match response {
                 Ok(response) => {
@@ -377,7 +377,7 @@ fn process_search_by_name(siv: &mut Cursive, product_name: String) {
         siv,
         move || {
             let mut list = ListView::new();
-            let response = client.get(format!("http://localhost:8000/products/name/{}", product_name)).send();
+            let response = client.get(format!("http://localhost/products/name/{}", product_name)).send();
 
             match response {
                 Ok(response) => {
@@ -428,7 +428,7 @@ fn process_search_by_category(siv: &mut Cursive, product_category: String) {
         siv,
         move || {
             let mut list = ListView::new();
-            let response = client.get(format!("http://localhost:8000/products/category/{}", product_category)).send();
+            let response = client.get(format!("http://localhost/products/category/{}", product_category)).send();
 
             match response {
                 Ok(response) => {
@@ -481,7 +481,7 @@ fn process_sale(siv: &mut Cursive, product_id: i32, quantity_sold: i32) {
     let async_view = AsyncView::new_with_bg_creator(
         siv,
         move || {
-            let response = client.post("http://localhost:8000/make-sale").json(&new_sale).send();
+            let response = client.post("http://localhost/make-sale").json(&new_sale).send();
 
             let message = match response {
                 Ok(response) => {
@@ -518,7 +518,7 @@ fn process_cancel_sale(siv: &mut Cursive, sale_id: i32, _product_id: i32) {
     let async_view = AsyncView::new_with_bg_creator(
         siv,
         move || {
-            let response = client.delete(format!("http://localhost:8000/cancel-sale/id/{}", sale_id)).send();
+            let response = client.delete(format!("http://localhost/cancel-sale/id/{}", sale_id)).send();
 
             let message = match response {
                 Ok(response) => {

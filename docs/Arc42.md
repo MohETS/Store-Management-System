@@ -77,6 +77,8 @@ précédents afin d’avoir un scénario ou des utilisateurs demandent la liste 
 dernier scénario est de voir l’impact sur la cache et la disponibilité des ressources lorsque plusieurs utilisateurs simultanés modifient les mêmes
 ressources.
 
+
+
 **Load Balancer**
 
 Pour rajouter du « load balancing » à notre projet, nous avons décidé d’implémenter Nginx dans la plus simple des façons. Nous créer un fichier de
@@ -174,6 +176,16 @@ l’information souhaitée en cache, si la prochaine requête est envoyée à un
 un système de cache comme Redis, qui rendrait la cache disponible pour toutes nos instances.
 
 
+Load Test Grafana
+===============
+**Graphique load test basique**
+![Graphique load test basique](GrafanaGraphics/LoadTest_Basic.png)
+
+**Graphique load test avec load balancer**
+![Graphique load test avec load balancer](GrafanaGraphics/LoadTest_LoadBalancing.png)
+
+**Graphique load test avec caching**
+![Graphique load test avec caching](GrafanaGraphics/LoadTest_Caching.png)
 
 Risks and Technical Debts
 =========================
