@@ -1,4 +1,4 @@
-# Labo 1 - BENKHALFA Mohamed-Amine
+# Labo 0 - BENKHALFA Mohamed-Amine
 
 ## Application Description
 
@@ -32,10 +32,14 @@ La création de l'image se fait avec le fichier `Dockerfile` qui exécute plusie
 0. Pour pouvoir lancer cette application, il est important de noter qu'il faut avoir préalablement installé Rust : https://www.rust-lang.org/tools/install
 1. Lorsque Rust est installé, il faudra cloner le projet
    - `git clone https://github.com/MohETS/Store-Management-System`
-2. Après que le projet ait été cloné et que vous êtes à l'intérieur du dossier du projet vous pouvez exécuter la commande suivante
-   - `cargo build`
-3. Pour construire l'application
-   - `cargo build --release --bin Labo1`
-4. Lancer l'application
-   - `cargo run ./Labo1`
-**Important!!! Il faut que l'application sois executé sur la machine virutelle afin d'avoir accèes à la base de données**
+2. Pour construire l'image de l'application server UI
+   - `docker build -f .\rocket_api\Dockerfile -t moh_store .`
+3. Pour déployer le server 
+   - `docker compose -f .\rocket_api\docker-compose.yml -p mohstore up --scale mohstore_server=5 -d`
+4. Pour utiliser l'application de console
+   - `cd .\cursive_client\`
+   - `cargo build --release --bin cursive_client`
+   - `cargo run -p cursive_client`
+5. Pour exécuter les tests du server
+   - Sans couverture de test : `cargo test`
+   - Avec de la couverture : `cargo tarpaulin -o html --skip-clean`

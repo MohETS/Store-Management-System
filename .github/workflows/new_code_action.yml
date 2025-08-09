@@ -3,12 +3,8 @@ name: LOG430 Lab push and pull request action
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'src/**'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 'src/**'
 
 env:
   CARGO_TERM_COLOR: always
@@ -26,13 +22,29 @@ jobs:
 
   #This task is in charge of running the tests
   test_job:
+    services:
+      postgres:
+        image: postgres:14.18
+        ports:
+          - 5432:5432
     runs-on: ubuntu-latest
     name: Test
     needs: lint_job
     steps:
     - uses: actions/checkout@v4
-    
+
+    - name: Run DB init
+      run: psql -h localhost -U ${{ secrets.TEST_DB_USER }} -d ${{ secrets.TEST_DB_NAME }} -f database/scripts/creation_script.sql
+      env:
+        PGPASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+
     - name: Run tests
+      env:
+        POSTGRES_USER: ${{ secrets.TEST_DB_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
       run: cargo test --verbose
 
   #This task is in charge of building the Docker image and uploading to Docker Hub if the building was successful

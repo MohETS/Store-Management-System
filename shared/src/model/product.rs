@@ -1,7 +1,9 @@
 use crate::schema::product;
-use diesel::{PgConnection, PgTextExpressionMethods, QueryDsl, QueryResult, Queryable, RunQueryDsl, Selectable};
+use diesel::{AsChangeset, PgConnection, PgTextExpressionMethods, QueryDsl, QueryResult, Queryable, RunQueryDsl, Selectable};
+use schemars::JsonSchema;
+use serde::{Serialize, Deserialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, AsChangeset, Serialize, Deserialize, JsonSchema, Debug, Clone)]
 #[diesel(table_name = product)]
 pub struct Product {
     pub id: i32,
@@ -33,6 +35,10 @@ impl Product {
     /*  UC-04 - View Product Stock */
     pub fn get_all_products(conn: &mut PgConnection) -> QueryResult<Vec<Product>> {
         product::table.load::<Product>(conn)
+    }
+
+    pub fn update_product(conn: &mut PgConnection, product: Product) -> QueryResult<usize> {
+        diesel::update(product::table.find(product.id)).set(product).execute(conn)
     }
 }
 
