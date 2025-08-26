@@ -41,3 +41,5 @@ config.toml
 
 # === Misc ===
 /node_modules/
+
+tarpaulin-report.html
